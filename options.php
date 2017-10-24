@@ -17,20 +17,20 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function wpmautic_options_page() {
 	?>
-	<div>
-		<h2><?php esc_html_e( 'WP Mautic', 'wp-mautic' ); ?></h2>
-		<p><?php esc_html_e( 'Add Mautic tracking capabilities to your website.', 'wp-mautic' ); ?></p>
+	<div class="wrap">
+		<h1><?php esc_html_e( 'WP Mautic', 'wp-mautic' ); ?></h1>
+		<p><?php esc_html_e( 'Add Mautic tracking capabilities to your website.','wp-mautic' ); ?></p>
 		<form action="options.php" method="post">
 			<?php settings_fields( 'wpmautic' ); ?>
 			<?php do_settings_sections( 'wpmautic' ); ?>
 			<?php submit_button(); ?>
 		</form>
-		<h3><?php esc_html_e( 'Shortcode Examples:', 'wp-mautic' ); ?></h3>
+		<h2><?php esc_html_e( 'Shortcode Examples:', 'wp-mautic' ); ?></h2>
 		<ul>
 			<li><?php esc_html_e( 'Mautic Form Embed:', 'wp-mautic' ); ?> <code>[mautic type="form" id="1"]</code></li>
 			<li><?php esc_html_e( 'Mautic Dynamic Content:', 'wp-mautic' ); ?> <code>[mautic type="content" slot="slot_name"]<?php esc_html_e( 'Default Text', 'wp-mautic' ); ?>[/mautic]</code></li>
 		</ul>
-		<h3><?php esc_html_e( 'Quick Links', 'wp-mautic' ); ?></h3>
+		<h2><?php esc_html_e( 'Quick Links', 'wp-mautic' ); ?></h2>
 		<ul>
 			<li>
 				<a href="https://github.com/mautic/mautic-wordpress#mautic-wordpress-plugin" target="_blank"><?php esc_html_e( 'Plugin docs', 'wp-mautic' ); ?></a>
