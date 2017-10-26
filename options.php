@@ -57,6 +57,18 @@ function wpmautic_options_page() {
  */
 function wpmautic_admin_init() {
 	register_setting( 'wpmautic', 'wpmautic_options', 'wpmautic_options_validate' );
+	register_setting( 'wpmautic', 'wpmautic_api_public_key',  array(
+		'type'              => 'string',
+		'description'       => 'Mautic Api public key',
+		'sanitize_callback' => 'sanitize_text_field',
+		'show_in_rest'      => false,
+	));
+	register_setting( 'wpmautic', 'wpmautic_api_secret_key', array(
+		'type'              => 'string',
+		'description'       => 'Mautic Api secret key',
+		'sanitize_callback' => 'sanitize_text_field',
+		'show_in_rest'      => false,
+	));
 
 	add_settings_section(
 		'wpmautic_main',
@@ -92,6 +104,47 @@ function wpmautic_admin_init() {
 		'wpmautic_track_logged_user',
 		'wpmautic',
 		'wpmautic_main'
+	);
+
+	add_settings_section(
+		'wpmautic_api_authentication',
+		__( 'API Authentication', 'wp-mautic' ),
+		'wpmautic_api_authentication_description',
+		'wpmautic'
+	);
+
+	add_settings_field(
+		'wpmautic_api_public_key',
+		__( 'Public Key', 'wp-mautic' ),
+		'wpmautic_option_page_text_field',
+		'wpmautic',
+		'wpmautic_api_authentication',
+		array(
+			'label_for'     => 'wpmautic_api_public_key',
+			'option'        => 'wpmautic_api_public_key',
+			'placeholder'   => ''
+		)
+	);
+
+	add_settings_field(
+		'wpmautic_api_secret_key',
+		__( 'Secret Key', 'wp-mautic' ),
+		'wpmautic_option_page_text_field',
+		'wpmautic',
+		'wpmautic_api_authentication',
+		array(
+			'label_for'     => 'wpmautic_api_secret_key',
+			'option'        => 'wpmautic_api_secret_key',
+			'placeholder'   => ''
+		)
+	);
+
+	add_settings_field(
+		'wpmautic_api_auth',
+		__( 'API Authentication', 'wp-mautic' ),
+		'wpmautic_api_auth_field',
+		'wpmautic',
+		'wpmautic_api_authentication'
 	);
 }
 add_action( 'admin_init', 'wpmautic_admin_init' );
@@ -190,6 +243,125 @@ function wpmautic_track_logged_user() {
 	</label>
 	<?php
 }
+
+/**
+ * @param array    $args {
+ *     @type string $label_for      The id of your field
+ *     @type string $option         The name of your option
+ *     @type string $placeholder    The place holder you want to display
+ * }
+ */
+function wpmautic_option_page_text_field( $args ){
+	$option = get_option( $args['option'], '' );
+
+	?>
+	<input
+		id="<?php echo $args['label_for']; ?>"
+		name="<?php echo $args['option']; ?>"
+		class="widefat"
+		type="text"
+		placeholder="<?php echo $args['placeholder']; ?>"
+		value="<?php echo esc_attr( $option ); ?>"
+	/>
+	<?php
+}
+
+/**
+ * Explication text for the API Authenticate process
+ */
+function wpmautic_api_authentication_description() {
+	$redirect_url = wpmautic_get_api_auth_redirect_url();
+
+	// code ODFhNjEzYzZkMGU3NWEzODViMjg4YTU0OTE4ZjZiOWVhMjY2NzE4MzUxYTZiZmFjNGIzYmUxZDllNzhiN2IxNQ
+
+	?>
+	<p>
+		<?php _e('Steps to follow to get your website connected to your Mautic instance', 'wp-mautic'); ?>
+	</p>
+	<ol>
+		<li><?php _e('You must activate the API on your Mautic instance', 'wp-mautic') ?></li>
+		<li>
+			<?php _e('Create a API Credentials', 'wp-mautic'); ?>
+			<ul class="ul-disc">
+				<li><?php _e('Authorization Protocol', 'wp-mautic'); echo ' : OAuth 2'; ?></li>
+				<li><?php printf( __('Name : What you want ( maybe : "%s") ', 'wp-mautic' ), get_bloginfo( 'name' ) ); ?></li>
+				<li><?php _e('Redirect URI', 'wp-mautic' ); echo " : <code>{$redirect_url}</code>"; ?></li>
+			</ul>
+		</li>
+		<li><?php _e('Copy past your Public Key and Secret Key below', 'wp-mautic');?></li>
+		<li><?php _e('Click the button bellow to Authenticate your website to your Mautic instance', 'wp-mautic');?></li>
+	</ol>
+	<?php
+
+}
+
+function wpmautic_api_auth_field(){
+
+	$url = wpmautic_option( 'base_url', '' );
+	$public_key = get_option( 'wpmautic_api_public_key', '' );
+	$secret_key = get_option( 'wpmautic_api_secret_key', '' );
+
+	if( $url && $public_key && $secret_key ){
+
+		$redirect_url = wpmautic_get_api_auth_redirect_url();
+
+
+		// Check if we are already authenticate
+		$access_token = get_option( '_wpmautic_access_token' );
+
+		if( $access_token ){
+
+			$mautic_api = new Mautic_Api();
+
+			$user = $mautic_api->call( 'users/self' );
+
+			if( $user && ! is_wp_error( $user ) ){
+
+				$api_log_out_url = add_query_arg( 'wpmautic-action', 'api-logout', $redirect_url );
+				?>
+				<p>
+					<span><?php printf( __( 'Your are authenticate as %s', 'wp-mautic'), "<code>{$user->username}</code>" ); ?></span>
+					<a href="<?php echo $api_log_out_url; ?>" class="button"><?php _e('Log Out'); ?></a>
+				</p>
+				<?php
+			}
+
+		} else {
+
+			$get_auth_param = array(
+				'client_id'     => $public_key,
+				'grant_type'    => 'authorization_code',
+				'redirect_uri'  => urlencode( $redirect_url ),
+				'response_type' => 'code',
+				// TODO 'state' => 'UNIQUE_STATE_STRING'
+			);
+
+			$get_auth_code_url = add_query_arg( $get_auth_param, $url . '/oauth/v2/authorize' );
+
+
+			?>
+			<p>
+				<a class="button" href="<?php echo $get_auth_code_url; ?>"><?php _e('Authenticate your website to your Mautic instance', 'wp-mautic') ?></a>
+			</p>
+			<?php
+		}
+
+
+	} else {
+		?>
+		<p class="description">
+			<?php _e('You need to file in your Mautic URL, API Public Key and API Private Key', 'wp-mautic'); ?>
+		</p>
+		<?php
+	}
+
+
+}
+
+function wpmautic_get_api_auth_redirect_url(){
+	return admin_url( 'options-general.php?page=wpmautic');
+}
+
 
 /**
  * Validate base URL input value

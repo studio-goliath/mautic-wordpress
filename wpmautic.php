@@ -32,6 +32,7 @@ add_action( 'admin_menu', 'wpmautic_settings' );
 add_action( 'plugins_loaded', 'wpmautic_injector' );
 
 include_once( VPMAUTIC_PLUGIN_DIR . '/shortcodes.php' );
+include_once( VPMAUTIC_PLUGIN_DIR . '/includes/Mautic_Api.php' );
 
 /**
  * Declare option page
@@ -39,13 +40,31 @@ include_once( VPMAUTIC_PLUGIN_DIR . '/shortcodes.php' );
 function wpmautic_settings() {
 	include_once( VPMAUTIC_PLUGIN_DIR . '/options.php' );
 
-	add_options_page(
+	$wpmautic_page_sufix_hook = add_options_page(
 		__( 'WP Mautic Settings', 'wp-mautic' ),
 		__( 'WPMautic', 'wp-mautic' ),
 		'manage_options',
 		'wpmautic',
 		'wpmautic_options_page'
 	);
+
+	add_action( "load-{$wpmautic_page_sufix_hook}", 'wpmautic_option_page_check_for_action'  );
+}
+
+function wpmautic_option_page_check_for_action(){
+
+	if( isset( $_GET['code'] ) ){
+		// We are getting au authenticate code back from the mautic instance
+
+		$mautic_api = new Mautic_Api();
+		$mautic_api->auth_get_token( esc_attr( $_GET['code'] ) );
+
+	} elseif ( isset( $_GET['wpmautic-action'] ) && $_GET['wpmautic-action'] === 'api-logout' ){
+
+		$mautic_api = new Mautic_Api();
+		$mautic_api->wpmautic_delete_api_token();
+		wp_redirect( wpmautic_get_api_auth_redirect_url() );
+	}
 }
 
 /**
