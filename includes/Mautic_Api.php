@@ -23,7 +23,19 @@ class Mautic_Api {
 	 *
 	 * @return object|\WP_Error response body or WP_Error when something went wrong
 	 */
-	public function call( $end_point, $body = array(), $method = 'GET'){
+	public function call( $end_point, $body = array(), $method = 'GET', $use_transient = true ){
+
+		if( $use_transient ){
+
+			$transient_name = md5( $end_point . implode( '-', $body ) . $method );
+
+			$response_body = get_transient( 'wpmautic_' . $transient_name );
+
+			if( $response_body ){
+				return $response_body;
+			}
+		}
+
 
 		$token = $this->get_token();
 
@@ -39,12 +51,22 @@ class Mautic_Api {
 				'body'      => $body,
 			));
 
+			$response_body = $this->handle_remote_response( $response );
 
-			return $this->handle_remote_response( $response );
+			if( $use_transient ) {
+				set_transient( 'wpmautic_' . $transient_name, $response_body, 600 );
+			}
+
+			return $response_body;
 		}
 
 	}
 
+
+	/**
+	 * Delete all options relative to API token
+	 *
+	 */
 	public function wpmautic_delete_api_token(){
 		delete_option( '_wpmautic_access_token' );
 		delete_option( '_wpmautic_access_token_expire_in' );
