@@ -358,10 +358,6 @@ function wpmautic_api_auth_field(){
 
 }
 
-function wpmautic_get_api_auth_redirect_url(){
-	return admin_url( 'options-general.php?page=wpmautic');
-}
-
 
 /**
  * Validate base URL input value

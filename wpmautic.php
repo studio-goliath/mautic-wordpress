@@ -34,6 +34,7 @@ add_action( 'plugins_loaded', 'wpmautic_injector' );
 include_once( VPMAUTIC_PLUGIN_DIR . '/shortcodes.php' );
 include_once( VPMAUTIC_PLUGIN_DIR . '/includes/Mautic_Api.php' );
 include_once( VPMAUTIC_PLUGIN_DIR . '/includes/Mautic_Segments_Metabox.php' );
+include_once( VPMAUTIC_PLUGIN_DIR . '/includes/Mautic_Post_by_Segment_Shortcode.php' );
 
 /**
  * Declare option page
@@ -260,4 +261,29 @@ function wpmautic_get_user_query() {
 	}
 
 	return $attrs;
+}
+
+
+/**
+ * Enqueue scripts
+ */
+function wpmautic_enqueue_scripts(){
+
+	$admin_url = admin_url( '/admin-ajax.php');
+
+	wp_register_script( 'wpmautic-scripts', plugins_url( '/assets/js/front-scripts.js', __FILE__ ), array(), '3.0', true );
+	wp_localize_script( 'wpmautic-scripts', 'wpmauticScriptsL10n' , array(
+		'adminUrl'  => $admin_url
+	));
+
+	wp_enqueue_script( 'wpmautic-scripts' );
+}
+add_action( 'wp_enqueue_scripts', 'wpmautic_enqueue_scripts' );
+
+
+/**
+ * @return string|void
+ */
+function wpmautic_get_api_auth_redirect_url(){
+	return admin_url( 'options-general.php?page=wpmautic');
 }
