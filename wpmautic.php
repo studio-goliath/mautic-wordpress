@@ -34,7 +34,7 @@ add_action( 'plugins_loaded', 'wpmautic_injector' );
 include_once( VPMAUTIC_PLUGIN_DIR . '/shortcodes.php' );
 include_once( VPMAUTIC_PLUGIN_DIR . '/includes/Mautic_Api.php' );
 include_once( VPMAUTIC_PLUGIN_DIR . '/includes/Mautic_Segments_Metabox.php' );
-include_once( VPMAUTIC_PLUGIN_DIR . '/includes/Mautic_Post_by_Segment_Shortcode.php' );
+include_once( VPMAUTIC_PLUGIN_DIR . '/includes/Mautic_Post_By_Segment_Shortcode.php' );
 
 /**
  * Declare option page
