@@ -24,6 +24,15 @@ class Mautic_Post_By_Segment_Shortcode {
 			);
 		}
 
+		/**
+		 * Update / add data to the WP_Query call to get post by segment
+		 *
+		 * @since 3.0.0
+		 *
+		 * @param array $attrs Attributes to be filters, default ['language' => get_locale()]
+		 */
+		$latest_post_query_args = apply_filters( 'wpmautic_post_by_segment_query_args', $latest_post_query_args );
+
 		$latest_post_query = new WP_Query( $latest_post_query_args );
 
 		$fill_post_query = false;
@@ -38,22 +47,22 @@ class Mautic_Post_By_Segment_Shortcode {
 			$fill_post_query = new WP_Query( $fill_post_query_args );
 		}
 
-		$response = '<ul>';
+		$response = '<div class="wpmautic-post-list">';
 
 		while ( $latest_post_query->have_posts() ){
 
 			$latest_post_query->the_post();
-			$response .= '<li>'. get_the_title() . '</li>';
+			$response .= $this->get_post_content();
 		}
 
 		if( $fill_post_query && $fill_post_query->have_posts() ){
 
 			while ( $fill_post_query->have_posts()){
 				$fill_post_query->the_post();
-				$response .= '<li>'. get_the_title() . '</li>';
+				$response .= $this->get_post_content();
 			}
 		}
-		$response .= '</ul>';
+		$response .= '</div>';
 
 		wp_reset_postdata();
 
@@ -101,6 +110,33 @@ class Mautic_Post_By_Segment_Shortcode {
 		$posts_number = isset( $atts['number'] ) ? intval( $atts['number'] ) : 3;
 
 		return "<div class='wpmautic-posts-segment' data-post-type='{$post_type}' data-order='{$order}' data-posts-number='{$posts_number}'><p>Loading...</p></div>";
+	}
+
+	private function get_post_content(){
+
+
+		$post_content = '';
+		$post_content = apply_filters( 'wpmautic_pre_post_markup', $post_content );
+
+		if( $post_content ){
+			return $post_content;
+		}
+
+		$post_class = implode( ' ', get_post_class() );
+		$post_content = "<article class='{$post_class}'>";
+		$post_content .= '<header class="entry-header">';
+		$post_content .= '<h2 class="entry-title">';
+		$post_content .= get_the_title();
+		$post_content .= '</h2>';
+		$post_content .= '</header>';
+		$post_content .= '<div class="entry-content">';
+		$post_content .= '<p>';
+		$post_content .= get_the_excerpt();
+		$post_content .= '</p>';
+		$post_content .= '</div>';
+		$post_content .= "</article>";
+
+		return apply_filters( 'wpmautic_post_markup', $post_content );
 	}
 }
 

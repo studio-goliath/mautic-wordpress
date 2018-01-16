@@ -282,7 +282,7 @@ add_action( 'wp_enqueue_scripts', 'wpmautic_enqueue_scripts' );
 
 
 /**
- * @return string|void
+ * @return string
  */
 function wpmautic_get_api_auth_redirect_url(){
 	return admin_url( 'options-general.php?page=wpmautic');
