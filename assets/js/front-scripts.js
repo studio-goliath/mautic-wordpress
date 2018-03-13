@@ -4,7 +4,7 @@ document.addEventListener('mauticPageEventDelivered', function (e) {
 	var postsSegmentWrapper = document.querySelectorAll('.wpmautic-posts-segment')
 
 	var contactId = '0'
-	if (response.success === 1) {
+	if ( response && response.success === 1) {
 		contactId = response.id
 	}
 
