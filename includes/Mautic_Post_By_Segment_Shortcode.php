@@ -108,8 +108,9 @@ class Mautic_Post_By_Segment_Shortcode {
 		$post_type = isset( $atts['post-type'] ) ? esc_attr( $atts['post-type'] ): 'post';
 		$order = isset( $atts['order'] ) && $atts['order'] === 'date' ? 'date' : 'rand';
 		$posts_number = isset( $atts['number'] ) ? intval( $atts['number'] ) : 3;
+		$loader = apply_filters( 'wpmautic_segment_loader', '<p>Loading...</p>' );
 
-		return "<div class='wpmautic-posts-segment' data-post-type='{$post_type}' data-order='{$order}' data-posts-number='{$posts_number}'><p>Loading...</p></div>";
+		return "<div class='wpmautic-posts-segment' data-post-type='{$post_type}' data-order='{$order}' data-posts-number='{$posts_number}'>{$loader}</div>";
 	}
 
 	private function get_post_content(){
