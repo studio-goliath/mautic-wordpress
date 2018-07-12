@@ -10,10 +10,11 @@ class Mautic_Post_By_Segment_Shortcode {
 		$segment = $this->get_contact_segment( $contact_id );
 
 		$latest_post_query_args = array(
-			'post_type'         =>  $post_type,
+			'post_type'         => $post_type,
 			'posts_per_page'    => $posts_number,
 			'no_found_rows'     => true,
 			'orderby'           => $order,
+			'post_status'       => 'publish'
 		);
 
 		if( ! is_wp_error( $segment ) ){
