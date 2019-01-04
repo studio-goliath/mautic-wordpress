@@ -13,6 +13,7 @@ document.addEventListener('mauticPageEventDelivered', function (e) {
 		var postType = element.dataset.postType
 		var order = element.dataset.order
 		var postsNumber = element.dataset.postsNumber
+		var exclude = element.dataset.exclude
 
 		var request = new XMLHttpRequest()
 		request.open('POST', wpmauticScriptsL10n.adminUrl, true)
@@ -30,8 +31,7 @@ document.addEventListener('mauticPageEventDelivered', function (e) {
 			}
 		}
 
-
-		request.send('contactId=' + contactId + '&postType=' + postType + '&order=' + order + '&postsNumber=' + postsNumber + '&action=mautic-get-segment-post')
+		request.send('contactId=' + contactId + '&postType=' + postType + '&order=' + order + '&postsNumber=' + postsNumber + '&exclude=' + exclude + '&action=mautic-get-segment-post')
 	})
 
 })

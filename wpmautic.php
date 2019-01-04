@@ -271,7 +271,7 @@ function wpmautic_enqueue_scripts(){
 
 	$admin_url = admin_url( '/admin-ajax.php');
 
-	wp_register_script( 'wpmautic-scripts', plugins_url( '/assets/js/front-scripts.js', __FILE__ ), array(), '3.0', true );
+	wp_register_script( 'wpmautic-scripts', plugins_url( '/assets/js/front-scripts.js', __FILE__ ), array(), '3.1', true );
 	wp_localize_script( 'wpmautic-scripts', 'wpmauticScriptsL10n' , array(
 		'adminUrl'  => $admin_url
 	));

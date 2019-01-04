@@ -5,7 +5,7 @@
  */
 class Mautic_Post_By_Segment_Shortcode {
 
-	public function get_pots_by_segment( $contact_id, $post_type, $order, $posts_number ){
+	public function get_pots_by_segment( $contact_id, $post_type, $order, $posts_number, $exclude = '' ){
 
 		$segment = $this->get_contact_segment( $contact_id );
 
@@ -14,8 +14,12 @@ class Mautic_Post_By_Segment_Shortcode {
 			'posts_per_page'    => $posts_number,
 			'no_found_rows'     => true,
 			'orderby'           => $order,
-			'post_status'       => 'publish'
+			'post_status'       => 'publish',
 		);
+
+		if ( $exclude ) {
+            $latest_post_query_args['post__not_in'] = explode( ',', $exclude );
+        }
 
 		if( ! is_wp_error( $segment ) ){
 			$latest_post_query_args['meta_query'][] = array(
@@ -109,12 +113,13 @@ class Mautic_Post_By_Segment_Shortcode {
 		$post_type = isset( $atts['post-type'] ) ? esc_attr( $atts['post-type'] ): 'post';
 		$order = isset( $atts['order'] ) && $atts['order'] === 'date' ? 'date' : 'rand';
 		$posts_number = isset( $atts['number'] ) ? intval( $atts['number'] ) : 3;
+		$exclude = isset( $atts['exclude'] ) ? $atts['exclude'] : '';
 		$loader = apply_filters( 'wpmautic_segment_loader', '<p>Loading...</p>' );
 
-		return "<div class='wpmautic-posts-segment' data-post-type='{$post_type}' data-order='{$order}' data-posts-number='{$posts_number}'>{$loader}</div>";
+		return "<div class='wpmautic-posts-segment' data-post-type='{$post_type}' data-order='{$order}' data-posts-number='{$posts_number}' data-exclude='{$exclude}'>{$loader}</div>";
 	}
 
-	private function get_post_content(){
+    public function get_post_content(){
 
 
 		$post_content = '';
@@ -161,9 +166,10 @@ function wpmautic_get_segment_post(){
 	$post_type = esc_attr( $_POST['postType'] );
 	$order = esc_attr( $_POST['order'] );
 	$posts_number = esc_attr( $_POST['postsNumber'] );
+	$exclude = esc_attr( $_POST['exclude'] );
 
 	$segment_shortcode = new Mautic_Post_By_Segment_Shortcode();
-	$html_response = $segment_shortcode->get_pots_by_segment( $contact_id, $post_type, $order, $posts_number );
+	$html_response = $segment_shortcode->get_pots_by_segment( $contact_id, $post_type, $order, $posts_number, $exclude );
 
 	wp_send_json( $html_response );
 }
